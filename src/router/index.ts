@@ -1,25 +1,50 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import { facts } from "@/assets/facts";
+import Home from "../views/HomeView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    name: 'home',
-    component: HomeView
+    path: "/",
+    name: "Home",
+    component: Home,
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
-]
+    path: "/fact/:id",
+    name: "Fact",
+    component: () => import("../views/FactComp.vue"),
+    beforeEnter: (to, _, next) => {
+      const { id } = to.params;
+
+      if (Array.isArray(id)) {
+        next({ path: "/error" });
+        return;
+      }
+
+      // Is a valid index number
+      const index = parseInt(id);
+      if (index < 0 || index >= facts.length) {
+        next({ path: "/error" });
+        return;
+      }
+
+      next();
+    },
+  },
+  {
+    path: "/facts",
+    name: "FactList",
+    component: () => import("../views/FactList.vue"),
+  },
+  {
+    path: "/:catchAll(.*)",
+    name: "PageNotFound",
+    component: () => import("../views/PageNotFound.vue"),
+  },
+];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-  routes
-})
+  history: createWebHistory(),
+  routes,
+});
 
-export default router
+export default router;
